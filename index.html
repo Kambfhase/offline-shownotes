@@ -17,6 +17,50 @@
 		<script src="dambf.js"></script>
 		<script>
 
+function zeroFill(number, width) {
+    var s = number.toString();
+    while (s.length < width) {
+      s = "0" + s;
+    }
+    return s;
+}
+
+function generateTimecode(times, leadingZeros, forceHours) {
+    function generatePart(time) {
+      var part,
+        hours,
+        minutes,
+        seconds,
+        milliseconds;
+
+      // prevent negative values from player
+      if (!time || time <= 0) {
+        return (leadingZeros || !time) ? (forceHours ? '00:00:00' : '00:00') : '--';
+      }
+      hours = Math.floor(time / 60 / 60);
+      minutes = Math.floor(time / 60) % 60;
+      seconds = Math.floor(time % 60) % 60;
+      milliseconds = Math.floor(time % 1 * 1000);
+      if (leadingZeros) {
+        // required (minutes : seconds)
+        part = zeroFill(minutes, 2) + ':' + zeroFill(seconds, 2);
+        hours = zeroFill(hours, 2);
+        hours = hours === '00' && !forceHours ? '' : hours + ':';
+        milliseconds = milliseconds ? '.' + zeroFill(milliseconds, 3) : '';
+      } else {
+        part = hours ? zeroFill(minutes, 2) : minutes.toString();
+        part += ':' + zeroFill(seconds, 2);
+        hours = hours ? hours + ':' : '';
+        milliseconds = milliseconds ? '.' + milliseconds : '';
+      }
+      return hours + part + milliseconds;
+    }
+    if (times[1] > 0 && times[1] < 9999999 && times[0] < times[1]) {
+      return generatePart(times[0]) + ',' + generatePart(times[1]);
+    }
+    return generatePart(times[0]);
+  }
+
 var $$ = $.dambf;
 
 $('#quellen').on('change', function(){
@@ -39,7 +83,8 @@ $('#quellen').on('change', function(){
 $('#notes').on('keyup', function(){
 	$(this).val(function( _, text){
 		return text.replace( /^###\B/gm, function(){
-			return $('audio').prop('currentTime');
+			var time = $('audio').prop('currentTime');
+			return generateTimecode(time,1,1);
 		});
 	});
 });
