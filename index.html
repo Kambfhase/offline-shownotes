@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+	<head><title>Offline Shownotes</title></head>
+	<body>
+		<div>
+			<audio controls>
+				<source src="http://www.culinaricast.de/wp-content/uploads//auphonic/CC090-Filme-Ich-koch.mp3!">
+				<source src="../../Downloads/CC090-Filme-Ich-koch.mp3">
+			</audio>
+			<textarea id="quellen" style="width:60em"></textarea>
+		</div>
+		<div>
+			<textarea id="notes" style="width:80em;height:500px;"></textarea>
+		</div>
+
+		<script src="http://code.jquery.com/jquery.js"></script>
+		<script src="dambf.js"></script>
+		<script>
+
+var $$ = $.dambf;
+
+$('#quellen').on('change', function(){
+	var frag = $(document.createDocumentFragment()), lines, sources;
+
+	lines = $(this).val().split('\n');
+	sources = lines.map(function(_){
+			return _.trim();
+		}).filter(function(_){
+			return _.length;
+		}).map(function(_){
+			return $('<source>',{src:_});
+		});
+
+	frag.append(sources);
+
+	$('audio').empty().append(frag);
+});
+
+$('#notes').on('keyup', function(){
+	$(this).val(function( _, text){
+		return text.replace( /^###\B/gm, function(){
+			return $('audio').prop('currentTime');
+		});
+	});
+});
+
+		</script>
+	</body>
+</html>
